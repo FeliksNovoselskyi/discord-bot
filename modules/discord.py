@@ -47,10 +47,14 @@ async def on_message(message):
     if message.author != bot_client.user:
         # Отримуємо контент повідомлення 
         message_content = message.content
+        message_id = message.id
 
-        # 
+        # отримуємо відповідь від Chatgpt
         response = await get_response_from_chatgpt(message_content)
 
+        # отримаємо повідомлення, з чату на яке треба відповісти, за його id
+        message_for_reply = await message.channel.fetch_message(message_id)
+
         # Надсилаємо у канал повідомлення від імені бота
-        await message.channel.send(response)
+        await message_for_reply.reply(response)
 
