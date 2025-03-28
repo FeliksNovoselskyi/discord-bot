@@ -8,7 +8,7 @@ import discord
 import os
 import dotenv
 
-from .gpt import get_response_from_chatgpt
+from .gpt import get_response_from_chatgpt, get_voice_from_tts, get_image_from_dalle
 
 
 # завантажуемо вміст файлу .env
@@ -49,11 +49,26 @@ async def on_message(message):
         message_content = message.content
         message_id = message.id
 
-        # отримуємо відповідь від Chatgpt
-        response = await get_response_from_chatgpt(message_content)
-
         # отримаємо повідомлення, з чату на яке треба відповісти, за його id
         message_for_reply = await message.channel.fetch_message(message_id)
+
+        # Перевіряє, чи користувач увів команду !voice
+        if message_content.startswith("!voice"):
+            # Отримуємо у відповідь аудіо файл
+            audio_file = await get_voice_from_tts(message_content[6:])
+
+            # Надсилаємо звуковий файл у чат
+            await message_for_reply.reply(file = discord.File(audio_file, filename="speech.mp3"))
+
+            # Завершуємо функцію
+            return
+        # Якщо користувач надсилає команду "!image"
+        elif message_content.startswith("!image"):
+            # Отримати як відповідь посилання на згенероване зображення
+            response = await get_image_from_dalle(message_content)
+        else:
+            # отримуємо відповідь від Chatgpt
+            response = await get_response_from_chatgpt(message_content)
 
         # Надсилаємо у канал повідомлення від імені бота
         await message_for_reply.reply(response)
